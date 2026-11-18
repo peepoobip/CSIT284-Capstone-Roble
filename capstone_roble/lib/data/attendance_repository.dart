@@ -1,6 +1,11 @@
 import 'dart:async';
-import 'package:capstone_roble/models/sessions.dart';
+import '../models/sessions.dart';
+import 'firestore_attendance_repository.dart';
 
+class AttendanceException implements Exception {
+  final String message;
+  const AttendanceException(this.message);
+}
 
 abstract class AttendanceRepository {
   Stream<List<Session>> watchSessions();
@@ -56,15 +61,19 @@ class InMemoryAttendanceRepository implements AttendanceRepository {
 
   @override
   Future<void> markPresent(String sessionId, Attendee attendee) async {
-    final session = _sessions.firstWhere((s) => s.id == sessionId);
-    if (!session.isOpen) throw StateError('Session is closed');
+    final i = _sessions.indexWhere((s) => s.id == sessionId);
+    if (i == -1) {
+      throw const AttendanceException('Unknown session. Is this the right QR?');
+    }
+    if (!_sessions[i].isOpen) {
+      throw const AttendanceException('This session is already closed.');
+    }
+    if (_attendees[sessionId]!.containsKey(attendee.studentId)) {
+      throw const AttendanceException('You are already marked present.');
+    }
     _attendees[sessionId]![attendee.studentId] = attendee;
     _changes.add(null);
   }
 }
 
-extension on Object? {
-
-}
-
-final AttendanceRepository repository = InMemoryAttendanceRepository();
+final AttendanceRepository repository = FirestoreAttendanceRepository();  
