@@ -7,37 +7,61 @@ class AppBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final baseColors = isDark
+        ? const [Color(0xFF0F0C29), Color(0xFF1B1446), Color(0xFF0B2545)]
+        : const [Color(0xFFFFD3E6), Color(0xFFDCCFFF), Color(0xFFBFE8FF)];
+
     return Stack(
       children: [
-        const Positioned.fill(
-          child: DecoratedBox(
+        Positioned.fill(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 500),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFFFF0F7),
-                  Color(0xFFF3EBFF),
-                  Color(0xFFE3F6FF),
-                ],
+                colors: baseColors,
               ),
             ),
           ),
         ),
         Positioned(
-          top: -90,
-          right: -70,
-          child: _Blob(color: const Color(0xFFFF4081), size: 260, alpha: 0.14),
+          top: -110,
+          right: -90,
+          child: _Glow(
+            color: const Color(0xFFFF4081),
+            size: 340,
+            alpha: isDark ? 0.35 : 0.40,
+          ),
         ),
         Positioned(
-          bottom: -100,
-          left: -80,
-          child: _Blob(color: const Color(0xFF00BFA5), size: 300, alpha: 0.14),
+          top: 300,
+          left: -120,
+          child: _Glow(
+            color: const Color(0xFFFF9100),
+            size: 280,
+            alpha: isDark ? 0.22 : 0.35,
+          ),
         ),
         Positioned(
-          top: 320,
-          left: -60,
-          child: _Blob(color: const Color(0xFFFF9100), size: 160, alpha: 0.12),
+          bottom: -130,
+          left: -90,
+          child: _Glow(
+            color: const Color(0xFF00BFA5),
+            size: 380,
+            alpha: isDark ? 0.30 : 0.40,
+          ),
+        ),
+        Positioned(
+          bottom: 60,
+          right: -110,
+          child: _Glow(
+            color: const Color(0xFF7C4DFF),
+            size: 300,
+            alpha: isDark ? 0.35 : 0.30,
+          ),
         ),
         child,
       ],
@@ -45,12 +69,12 @@ class AppBackground extends StatelessWidget {
   }
 }
 
-class _Blob extends StatelessWidget {
+class _Glow extends StatelessWidget {
   final Color color;
   final double size;
   final double alpha;
 
-  const _Blob({required this.color, required this.size, required this.alpha});
+  const _Glow({required this.color, required this.size, required this.alpha});
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +83,12 @@ class _Blob extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: color.withValues(alpha: alpha),
+        gradient: RadialGradient(
+          colors: [
+            color.withValues(alpha: alpha),
+            color.withValues(alpha: 0),
+          ],
+        ),
       ),
     );
   }

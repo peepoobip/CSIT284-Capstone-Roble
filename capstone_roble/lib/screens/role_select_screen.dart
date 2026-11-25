@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../main.dart';
 import '../theme.dart';
 import '../widgets/animations.dart';
+import 'student_screen.dart';
 import 'teacher_home_screen.dart';
 
 class RoleSelectScreen extends StatelessWidget {
@@ -11,6 +13,7 @@ class RoleSelectScreen extends StatelessWidget {
     final text = Theme.of(context).textTheme;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Column(
         children: [
           Container(
@@ -26,7 +29,14 @@ class RoleSelectScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _FloatingIcon(),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        _FloatingIcon(),
+                        _ThemeToggleButton(),
+                      ],
+                    ),
                     const SizedBox(height: 20),
                     Text(
                       'Attendance\nChecker',
@@ -74,17 +84,9 @@ class RoleSelectScreen extends StatelessWidget {
                       title: "I'm a Student",
                       subtitle: 'Scan the QR to mark yourself present',
                       gradient: AppColors.sunset,
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            content: const Text('Student scan screen is next'),
-                          ),
-                        );
-                      },
+                      onTap: () => Navigator.of(context).push(
+                        fadeSlideRoute(const StudentScreen()),
+                      ),
                     ),
                   ),
                 ],
@@ -93,6 +95,37 @@ class RoleSelectScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ThemeToggleButton extends StatelessWidget {
+  const _ThemeToggleButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (context, mode, _) {
+        final isDark = mode == ThemeMode.dark;
+        return Material(
+          color: Colors.white.withValues(alpha: 0.2),
+          shape: const CircleBorder(),
+          child: IconButton(
+            onPressed: () {
+              themeNotifier.value = isDark ? ThemeMode.light : ThemeMode.dark;
+            },
+            icon: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              child: Icon(
+                isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                key: ValueKey(isDark),
+                color: Colors.white,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
